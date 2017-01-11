@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+enum {BUCKET COUNT=1024};
+struct Node { 
+ const char *key; 
+ int value; 
+ struct Node *next; 
+}; 
+struct Table { 
+ struct Node *first; 
+};
+struct Table *Table_create(void) { 
+ struct Table *t; 
+ t = (struct Table*)calloc(1, sizeof(struct Table)); 
+ return t; 
+}
+void Table_add(struct Table *t, 
+ const char *key, int value) { 
+ struct Node *p = (struct Node*)malloc(sizeof(struct Node)); 
+ int h = hash(key); 
+ p->key = key; 
+ p->value = value; 
+ p->next = t->array[h]; 
+ t->array[h] = p; 
+}
+int Table_search(struct Table *t, 
+ const char *key, int *value) { 
+ struct Node *p; 
+ int h = hash(key); 
+ for (p = t->array[h]; p != NULL; p = p->next) 
+ if (strcmp(p->key, key) == 0) { 
+ *value = p->value; 
+ return 1; 
+ } 
+ return 0; 
+}
+void Table_free(struct Table *t) { 
+ struct Node *p; 
+ struct Node *nextp; 
+ int b; 
+ for (b = 0; b < BUCKET_COUNT; b++) 
+ for (p = t->array[b]; p != NULL; p = nextp) { 
+ nextp = p->next; 
+ free(p); 
+ } 
+ free(t); 
+}
+void main(){
+struct Table *t;
+int value,found;
+printf("create table");
+t = Table_create();
+printf("Adding elements to the table");
+Table_add(t, "Ruth", 3); 
+Table_add(t, "Gehrig", 4); 
+Table_add(t, "Mantle", 7);
+printf("searching for an element");
+found = Table_search(t, "Gehrig", &value);
+printf("freeing the table");
+Table_free(t);}
